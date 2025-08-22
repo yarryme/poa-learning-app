@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POA 코딩 대화형 학습 자료</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Beige, Soft Gray, Muted Teal) -->
+    <!-- Application Structure Plan: A three-tab SPA ('Learn', 'Case Studies', 'Quiz') for non-linear learning. 'Learn' uses interactive cards and accordions for digestible content. 'Case Studies' provides practical examples. 'Quiz' offers interactive assessment with visual feedback (a donut chart) to reinforce knowledge. This structure organizes complex information into manageable, user-driven modules, enhancing engagement and retention over a linear document. -->
+    <!-- Visualization & Content Choices: 1. POA Codes -> Goal: Inform -> Presentation: Interactive HTML/Tailwind cards -> Interaction: Click to reveal description -> Justification: Breaks down key terms for easy learning. 2. Coding Principles -> Goal: Organize -> Presentation: Accordion list -> Interaction: Click to expand/collapse -> Justification: Manages a long list of rules without overwhelming the user. 3. Quiz Score -> Goal: Engage/Inform -> Viz: Donut Chart -> Interaction: Dynamically generated on quiz completion -> Justification: Provides instant, visual feedback on performance, increasing engagement. -> Library: Chart.js (Canvas). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF6;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            color: #0C4A6E;
+            border-bottom-color: #0C4A6E;
+            font-weight: 700;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .quiz-feedback {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">입원 시 상병(POA) 코딩 학습</h1>
+            <p class="mt-2 text-lg text-gray-600">대화형 가이드로 POA 코딩 원칙을 마스터하세요.</p>
+        </header>
+
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <nav class="border-b border-gray-200 mb-6">
+                <ul class="flex flex-wrap -mb-px text-lg font-medium text-center">
+                    <li class="mr-2">
+                        <button class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-300 active" data-tab="learn">학습하기</button>
+                    </li>
+                    <li class="mr-2">
+                        <button class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-300" data-tab="cases">사례 연구</button>
+                    </li>
+                    <li>
+                        <button class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-300" data-tab="quiz">퀴즈</button>
+                    </li>
+                </ul>
+            </nav>
+
+            <main>
+                <section id="learn" class="content-section active">
+                    <div class="space-y-8">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-4 text-sky-800">1. POA 개념 및 목적</h2>
+                            <p class="text-base leading-relaxed bg-sky-50 p-4 rounded-lg">
+                                <strong>POA(Present On Admission)</strong>는 환자가 병원에 <strong class="text-sky-700">입원할 당시 이미 존재했던</strong> 질환이나 상태를 의미합니다. 이는 질환이 진단된 시점이 아닌, <strong class="text-sky-700">발병 시점</strong>이 입원 당시였는지 여부를 구분하는 중요한 기준입니다. POA 정보는 환자 안전과 의료의 질을 평가하는 데 필수적인 요소입니다.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-bold mb-4 text-sky-800">2. POA 분류 코드</h2>
+                            <p class="mb-4">POA는 다음과 같은 5가지 코드로 분류됩니다. 각 카드를 클릭하여 설명을 확인하세요.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                <div class="poa-code-card cursor-pointer p-4 bg-green-100 rounded-lg text-center" data-code="Y">
+                                    <h3 class="font-bold text-2xl text-green-800">Y</h3>
+                                    <p class="font-semibold text-green-700">Yes</p>
+                                    <p class="poa-code-desc hidden mt-2 text-sm text-green-800">해당 상병이 입원 당시에 존재함.</p>
+                                </div>
+                                <div class="poa-code-card cursor-pointer p-4 bg-red-100 rounded-lg text-center" data-code="N">
+                                    <h3 class="font-bold text-2xl text-red-800">N</h3>
+                                    <p class="font-semibold text-red-700">No</p>
+                                    <p class="poa-code-desc hidden mt-2 text-sm text-red-800">해당 상병이 입원 당시에는 존재하지 않았으며, 입원 기간 중에 발생함.</p>
+                                </div>
+                                <div class="poa-code-card cursor-pointer p-4 bg-yellow-100 rounded-lg text-center" data-code="U">
+                                    <h3 class="font-bold text-2xl text-yellow-800">U</h3>
+                                    <p class="font-semibold text-yellow-700">Unknown</p>
+                                    <p class="poa-code-desc hidden mt-2 text-sm text-yellow-800">의무기록에 해당 상병이 입원 당시 존재했는지 결정할 기록이 불충분함.</p>
+                                </div>
+                                <div class="poa-code-card cursor-pointer p-4 bg-purple-100 rounded-lg text-center" data-code="W">
+                                    <h3 class="font-bold text-2xl text-purple-800">W</h3>
+                                    <p class="font-semibold text-purple-700">Clinically Undetermined</p>
+                                    <p class="poa-code-desc hidden mt-2 text-sm text-purple-800">해당 상병의 POA 여부를 의료진이 임상적으로 판단할 수 없음.</p>
+                                </div>
+                                <div class="poa-code-card cursor-pointer p-4 bg-gray-100 rounded-lg text-center" data-code="E">
+                                    <h3 class="font-bold text-2xl text-gray-800">E</h3>
+                                    <p class="font-semibold text-gray-700">Exempt</p>
+                                    <p class="poa-code-desc hidden mt-2 text-sm text-gray-800">POA 분류에서 제외되는 예외 상병 (예: 후유증, 선천성 기형 등).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-bold mb-4 text-sky-800">3. POA 코딩 원칙</h2>
+                            <div class="space-y-2">
+                                <div class="border border-gray-200 rounded-lg">
+                                    <button class="accordion-toggle w-full p-4 text-left font-semibold bg-gray-50 hover:bg-gray-100 flex justify-between items-center">
+                                        일반 원칙
+                                        <span class="transform transition-transform duration-300">▼</span>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <ul class="list-disc list-inside p-4 text-gray-700 bg-white">
+                                            <li>모든 상병명에 POA 코드를 부여합니다.</li>
+                                            <li>의무기록지를 근거로 POA를 작성합니다.</li>
+                                            <li>진단 시점이 아닌, <strong>발생 시점</strong>을 기준으로 판단합니다.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg">
+                                    <button class="accordion-toggle w-full p-4 text-left font-semibold bg-gray-50 hover:bg-gray-100 flex justify-between items-center">
+                                        세부 원칙 (1-11)
+                                        <span class="transform transition-transform duration-300">▼</span>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <ol class="list-decimal list-inside p-4 text-gray-700 bg-white space-y-2">
+                                            <li><strong>입원 시 또는 입원 이전</strong>에 진단받은 상병은 <strong>Y</strong>입니다.</li>
+                                            <li>입원 중 진단되었더라도 입원 시 존재가 <strong>명확</strong>한 상병은 <strong>Y</strong>입니다.</li>
+                                            <li>입원 중 진단된 <strong>만성질환</strong>은 입원 시 존재 여부가 확인되지 않아도 <strong>Y</strong>입니다.</li>
+                                            <li><strong>입원 시 존재하지 않은</strong> 상병은 <strong>N</strong>입니다. (예: 낙상, 약물 부작용, 수술 후 감염)</li>
+                                            <li>기록이 불분명한 상병은 <strong>U</strong>로 기재합니다.</li>
+                                            <li>POA 여부를 <strong>임상적으로 판단할 수 없는</strong> 상병은 <strong>W</strong>입니다.</li>
+                                            <li><strong>복합 상병</strong>은 한 부분이라도 입원 시 존재하지 않으면 <strong>N</strong>입니다.</li>
+                                            <li><strong>감염원</strong>이 입원 후 밝혀졌더라도 입원 시 관련 증상/검사가 있었다면 <strong>Y</strong>입니다.</li>
+                                            <li><strong>임신/출산 관련</strong> 상병은 분만 시점을 기준으로 판단하지 않습니다.</li>
+                                            <li><strong>신생아</strong>의 출생 시 또는 자궁 내에서 발생한 병태는 <strong>Y</strong>입니다.</li>
+                                            <li><strong>POA 예외 코드 목록</strong>에 해당하는 상병은 <strong>E</strong>로 기재합니다.</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="cases" class="content-section">
+                    <h2 class="text-2xl font-bold mb-6 text-sky-800">4. 코딩 사례 연구</h2>
+                    <div class="space-y-6">
+                        <div class="bg-white border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-900">사례 1: T81.4 (후처치에 따른 출혈 및 혈종)</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p><strong>환자 정보:</strong> 65세 여성, 만성 위궤양으로 내시경 수술 위해 입원</p>
+                                    <p><strong>경과:</strong> 수술은 성공적이었으나, 수술 후 회복실에서 하혈이 발생하여 입원 기간 연장</p>
+                                </div>
+                                <div class="bg-amber-50 p-4 rounded-md">
+                                    <p><strong>진단:</strong></p>
+                                    <ul class="list-disc list-inside ml-2">
+                                        <li>K25.9 상세불명의 위궤양 (<span class="font-bold text-green-600">Y</span>)</li>
+                                        <li>T81.4 후처치에 따른 출혈 및 혈종 (<span class="font-bold text-red-600">N</span>)</li>
+                                    </ul>
+                                    <p class="mt-2"><strong>POA 적용:</strong> 위궤양은 입원 시 존재했으므로 Y. 출혈은 입원 기간 중 <strong>수술 후 발생</strong>했으므로 원칙 4에 따라 <strong class="text-red-600">N</strong>을 부여합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-900">사례 2: O82.1 (응급 제왕절개 분만)</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p><strong>환자 정보:</strong> 임신 37주 임산부</p>
+                                    <p><strong>경과:</strong> 전신 근육통과 발열로 내원, 융모양막염 의심되어 응급 제왕절개 수술 시행</p>
+                                </div>
+                                <div class="bg-amber-50 p-4 rounded-md">
+                                    <p><strong>진단:</strong></p>
+                                     <ul class="list-disc list-inside ml-2">
+                                        <li>O82.1 응급 제왕절개 분만 (<span class="font-bold text-green-600">Y</span>)</li>
+                                     </ul>
+                                    <p class="mt-2"><strong>POA 적용:</strong> 응급 제왕절개는 입원 중 발생한 행위이지만, 이는 입원 시 존재했던 <strong>융모양막염 의심</strong>이라는 병태에 따른 것이므로 <strong class="text-green-600">Y</strong>를 부여합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="quiz" class="content-section">
+                    <h2 class="text-2xl font-bold mb-6 text-sky-800">5. POA 코딩 원칙 퀴즈</h2>
+                    <div id="quiz-container" class="space-y-6"></div>
+                    <button id="submit-quiz" class="mt-8 bg-sky-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-800 transition-colors">결과 확인</button>
+                    <div id="quiz-results" class="mt-8 hidden">
+                        <h3 class="text-xl font-bold mb-4">퀴즈 결과</h3>
+                        <div class="chart-container w-full max-w-xs mx-auto h-64">
+                            <canvas id="quiz-chart"></canvas>
+                        </div>
+                        <p id="quiz-score" class="text-center text-2xl font-bold mt-4"></p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "1. 다음 중 POA 코드 'Y'를 부여하는 경우는?",
+                options: [
+                    "입원 중 낙상으로 발생한 골절",
+                    "수술 후 발생한 폐렴",
+                    "입원 중 진단받았으나 입원 시 존재 여부가 불명확한 만성 신우신염",
+                    "입원 후 발생한 수술 부위 감염"
+                ],
+                answer: 2,
+                rationale: "입원 중 진단된 만성질환은 입원 당시 존재 여부가 명확하지 않아도 POA 원칙에 따라 'Y'를 부여합니다."
+            },
+            {
+                question: "2. 입원 시 상병 코딩 원칙으로 옳지 않은 것은?",
+                options: [
+                    "POA 코드는 모든 상병명에 부여한다.",
+                    "POA 코드는 의무기록을 근거로 작성한다.",
+                    "POA 코드는 상병이 진단된 시점을 기준으로 작성해야 한다.",
+                    "POA는 입원 당시 존재했던 질환을 구분한다."
+                ],
+                answer: 2,
+                rationale: "POA는 상병이 진단된 시점이 아닌 발병 시점을 기준으로 작성해야 합니다."
+            },
+            {
+                question: "3. 다음 중 POA 코드 'E'를 부여하는 상병은?",
+                options: [
+                    "고혈압",
+                    "뇌경색증의 후유증",
+                    "급성 기관지염",
+                    "갑상선 기능 항진증"
+                ],
+                answer: 1,
+                rationale: "뇌혈관질환의 후유증(I69)은 POA 예외 상병 목록에 포함되므로 'E'를 부여합니다."
+            },
+            {
+                question: "4. 복합 상병 코딩 사례 중 POA 코드 'N'을 부여하는 경우는?",
+                options: [
+                    "입원 이전에 진단받은 당뇨병",
+                    "출혈이 있는 급성 위궤양으로 입원하였고, 입원 기간 중 출혈이 발생한 경우",
+                    "심한 기침과 호흡곤란으로 입원하여 입원 중 '폐암'을 진단받은 경우",
+                    "혈뇨를 동반한 전립선 증식증으로 입원한 경우"
+                ],
+                answer: 1,
+                rationale: "복합 상병의 경우, 한 가지라도 입원 시 존재하지 않는 내용이 있다면 'N'을 부여합니다. 이 사례에서는 위궤양의 '출혈'이 입원 기간 중에 발생했으므로 'N'을 부여합니다."
+            },
+            {
+                question: "5. 입원 중 균 배양 검사 결과가 며칠 후 확인되어 '폐렴간균에 의한 폐렴'으로 최종 진단된 경우, POA 코드는?",
+                options: ["N", "U", "E", "Y"],
+                answer: 3,
+                rationale: "감염원이 입원 이후 밝혀졌더라도, 입원 시 이미 감염의 증상이 있었거나 확인을 위한 검사가 있었다면 POA 원칙에 따라 'Y'를 부여합니다."
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.content-section');
+            const poaCodeCards = document.querySelectorAll('.poa-code-card');
+            const accordions = document.querySelectorAll('.accordion-toggle');
+            const quizContainer = document.getElementById('quiz-container');
+            const submitQuizBtn = document.getElementById('submit-quiz');
+            const quizResultsContainer = document.getElementById('quiz-results');
+            const quizScoreEl = document.getElementById('quiz-score');
+            let quizChart = null;
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === tab.dataset.tab) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            poaCodeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const desc = card.querySelector('.poa-code-desc');
+                    desc.classList.toggle('hidden');
+                });
+            });
+
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', () => {
+                    const content = accordion.nextElementSibling;
+                    const icon = accordion.querySelector('span');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            function buildQuiz() {
+                quizData.forEach((item, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'border border-gray-200 p-4 rounded-lg';
+                    
+                    const questionP = document.createElement('p');
+                    questionP.className = 'font-semibold mb-3';
+                    questionP.textContent = item.question;
+                    questionDiv.appendChild(questionP);
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'space-y-2';
+                    item.options.forEach((option, i) => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer';
+                        
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = `question${index}`;
+                        radio.value = i;
+                        radio.className = 'mr-3';
+
+                        label.appendChild(radio);
+                        label.appendChild(document.createTextNode(option));
+                        optionsDiv.appendChild(label);
+                    });
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.id = `feedback${index}`;
+                    feedbackDiv.className = 'quiz-feedback mt-3 p-3 rounded-md text-sm';
+                    feedbackDiv.innerHTML = `<strong>해설:</strong> ${item.rationale}`;
+                    questionDiv.appendChild(feedbackDiv);
+
+                    quizContainer.appendChild(questionDiv);
+                });
+            }
+
+            function showResults() {
+                let score = 0;
+                quizData.forEach((item, index) => {
+                    const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                    const feedbackEl = document.getElementById(`feedback${index}`);
+                    const questionBlock = feedbackEl.parentElement;
+
+                    questionBlock.querySelectorAll('label').forEach(l => l.classList.remove('bg-red-100', 'bg-green-100'));
+                    
+                    if (selected) {
+                        const answer = parseInt(selected.value);
+                        const correctLabel = selected.parentElement.parentElement.children[item.answer];
+                        correctLabel.classList.add('bg-green-100');
+
+                        if (answer === item.answer) {
+                            score++;
+                        } else {
+                            selected.parentElement.classList.add('bg-red-100');
+                        }
+                    } else {
+                        const correctLabel = questionBlock.querySelectorAll('label')[item.answer];
+                        correctLabel.classList.add('bg-green-100');
+                    }
+                    feedbackEl.style.display = 'block';
+                });
+                
+                quizResultsContainer.style.display = 'block';
+                const correctAnswers = score;
+                const incorrectAnswers = quizData.length - score;
+                quizScoreEl.textContent = `${correctAnswers} / ${quizData.length} 정답`;
+
+                const ctx = document.getElementById('quiz-chart').getContext('2d');
+                if(quizChart) {
+                    quizChart.destroy();
+                }
+                quizChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['정답', '오답'],
+                        datasets: [{
+                            data: [correctAnswers, incorrectAnswers],
+                            backgroundColor: ['#10B981', '#EF4444'],
+                            borderColor: ['#FDFBF6'],
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                enabled: true
+                            }
+                        }
+                    }
+                });
+                submitQuizBtn.textContent = "다시 풀기";
+            }
+            
+            submitQuizBtn.addEventListener('click', () => {
+                if(submitQuizBtn.textContent === "다시 풀기") {
+                    quizContainer.innerHTML = '';
+                    buildQuiz();
+                    quizResultsContainer.style.display = 'none';
+                    submitQuizBtn.textContent = "결과 확인";
+                } else {
+                    showResults();
+                }
+            });
+
+            buildQuiz();
+        });
+    </script>
+</body>
+</html>
